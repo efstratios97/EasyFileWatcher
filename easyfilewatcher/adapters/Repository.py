@@ -1,6 +1,8 @@
 from typing import List
-from domain.EasyFileWatcherUnit import EasyFileWatcherUnit
+
 from sqlalchemy.orm import Session
+
+from easyfilewatcher.domain.EasyFileWatcherUnit import EasyFileWatcherUnit
 
 
 class EasyFileWatcherUnitRepository:

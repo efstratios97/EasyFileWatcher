@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from utils.config import (EASY_FILE_WATCHER_UNIT_ID, EASY_FILE_WATCHER_UNIT_FILE_PATH,
-                          EASY_FILE_WATCHER_UNIT_LAST_MODIFICATION, EASY_FILE_WATCHER_UNIT_SIZE)
+
+from easyfilewatcher.utils.config import (EASY_FILE_WATCHER_UNIT_ID, EASY_FILE_WATCHER_UNIT_FILE_PATH,
+                                          EASY_FILE_WATCHER_UNIT_LAST_MODIFICATION, EASY_FILE_WATCHER_UNIT_SIZE)
 
 class_attributes_easy_file_watcher_unit = {
     EASY_FILE_WATCHER_UNIT_ID: "directory_watcher_id",

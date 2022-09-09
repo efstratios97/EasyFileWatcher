@@ -1,9 +1,9 @@
 from sqlalchemy import Table, Column, String, Integer, Float
 from sqlalchemy.orm import registry
 
-from utils.config import (DIRECTORY_TABLE, EASY_FILE_WATCHER_UNIT_ID, EASY_FILE_WATCHER_UNIT_FILE_PATH,
-                          EASY_FILE_WATCHER_UNIT_LAST_MODIFICATION, EASY_FILE_WATCHER_UNIT_SIZE, DEFAULT_ENGINE)
-from domain.EasyFileWatcherUnit import EasyFileWatcherUnit, class_attributes_easy_file_watcher_unit
+from easyfilewatcher.utils.config import (DIRECTORY_TABLE, EASY_FILE_WATCHER_UNIT_ID, EASY_FILE_WATCHER_UNIT_FILE_PATH,
+                                          EASY_FILE_WATCHER_UNIT_LAST_MODIFICATION, EASY_FILE_WATCHER_UNIT_SIZE, DEFAULT_ENGINE)
+from easyfilewatcher.domain.EasyFileWatcherUnit import EasyFileWatcherUnit, class_attributes_easy_file_watcher_unit
 
 mapper_registry = registry()
 

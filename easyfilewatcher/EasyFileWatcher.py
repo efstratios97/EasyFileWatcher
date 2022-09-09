@@ -134,7 +134,8 @@ class EasyFileWatcher:
         return current_file_watcher_units
 
     def add_directory_to_watch(self, directory_path: str, callback: FunctionType,
-                               callback_param: Optional[dict] = None, directory_watcher_id: Optional[str] = None) -> None:
+                               callback_param: Optional[dict] = None, directory_watcher_id: Optional[str] = None,
+                               event_on_deletion: Optional[bool] = False) -> None:
         """This method registers the directory of interest to watch. 
         It further requires the function signature. 
         Parameters to the function can be passed as a dictionary. 
@@ -142,7 +143,8 @@ class EasyFileWatcher:
             :param str directory_path: path of directory to watch
             :param func callback: custom user to function to be executed at change in directory
             :param Optional[dict] callback_param: parameters to be passed to callback function
-            :param str directory_watcher_id: assigned ID of watcher
+            :param Optional[str] directory_watcher_id: assigned ID of watcher
+            :param Optional[bool] event_on_deletion: shall an event be triggered at deletion of File
             :returns: List of EasyFileWatcherUnits
             :rtype: List[EasyFileWatcherUnit]
         """
@@ -154,7 +156,7 @@ class EasyFileWatcher:
             uow.easy_file_watcher_repository.add_all(
                 easy_file_watcher_units=easy_file_watcher_units)
             uow.commit()
-        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param], seconds=2,
+        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param, event_on_deletion], seconds=2,
                                    replace_existing=True, id=directory_watcher_id)
 
     @staticmethod
@@ -176,8 +178,10 @@ class EasyFileWatcher:
                 uow.commit()
 
     @staticmethod
-    def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit]) -> bool:
+    def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit], event_on_deletion: bool) -> bool:
         """This method detects changes in the directory of interest to watch."""
-        if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
+        length_eval = len(new_file_watcher_units) != len(old_file_watcher_units) if event_on_deletion else len(
+            new_file_watcher_units) > len(old_file_watcher_units)
+        if length_eval or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
             return True
         return False

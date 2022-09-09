@@ -1,7 +1,7 @@
 
 from sqlalchemy.orm import sessionmaker
-from utils.config import DEFAULT_SESSION_FACTORY
-from adapters.Repository import EasyFileWatcherUnitRepository
+from easyfilewatcher.utils.config import DEFAULT_SESSION_FACTORY
+from easyfilewatcher.adapters.Repository import EasyFileWatcherUnitRepository
 
 
 class EasyFileWatcherUoW:
