@@ -65,7 +65,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://www.ltep-technologies.com/wp-content/uploads/2022/06/ATHINA_LOGO-3.png)
+<!-- [![Product Name Screen Shot][product-screenshot]](https://www.ltep-technologies.com/wp-content/uploads/2022/06/ATHINA_LOGO-3.png) -->
 
 This is yet another FileWatcher. We developed it to run smoothier and without sideffects in comparison to common Packages like WatchDog.
 
