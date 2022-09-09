@@ -33,7 +33,7 @@ class EasyFileWatcher:
         """
         global workflow_scheduler
         jobstores = {
-            'default': SQLAlchemyJobStore(url='sqlite:///' + os.path.join(os.path.normpath(os.path.dirname(__file__) + os.sep + os.pardir) + '/data/jobs.sqlite'))
+            'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
         }
         executors = {
             'default': {'type': 'threadpool', 'max_workers': 20},
@@ -154,11 +154,11 @@ class EasyFileWatcher:
             uow.easy_file_watcher_repository.add_all(
                 easy_file_watcher_units=easy_file_watcher_units)
             uow.commit()
-        workflow_scheduler.add_job(EasyFileWatcher.__execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param], seconds=2,
+        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param], seconds=2,
                                    replace_existing=True, id=directory_watcher_id)
 
     @staticmethod
-    def __execute_job(*args):
+    def execute_job(*args):
         """This method executes the call back of the directory of interest to watch."""
         file_watcher_units_in_db = EasyFileWatcher.__get_all_current_filewatcher_units_by_directory_watcher_id(
             args[0])
@@ -167,8 +167,6 @@ class EasyFileWatcher:
         confirmed_change = EasyFileWatcher.__detect_change(
             old_file_watcher_units=file_watcher_units_in_db, new_file_watcher_units=file_watcher_units)
         if confirmed_change:
-            import pdb
-            pdb.set_trace()
             args[2](**args[3])
             with EasyFileWatcherUoW() as uow:
                 [uow.easy_file_watcher_repository.delete(
@@ -176,7 +174,6 @@ class EasyFileWatcher:
                 uow.commit()
                 uow.easy_file_watcher_repository.add_all(file_watcher_units)
                 uow.commit()
-            print("change")
 
     @staticmethod
     def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit]) -> bool:

@@ -2,9 +2,9 @@ import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
+# os.path.join(os.path.normpath(os.path.dirname(__file__) + os.sep + os.pardir + os.sep + os.pardir)
 DEFAULT_ENGINE = create_engine(
-    "sqlite:///" + os.path.join(os.path.normpath(os.path.dirname(
-        __file__) + os.sep + os.pardir + os.sep + os.pardir) + '/data/easyfilewatcher.sqlite'))
+    'sqlite:///data/easyfilewatcher.sqlite')
 DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=DEFAULT_ENGINE, expire_on_commit=False)
 DB_NAME = "easyfilewatcherdb"
