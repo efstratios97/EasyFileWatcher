@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EasyFileWatcher",                     # This is the name of the package
-    version="0.0.3",                        # The initial release version
+    version="0.0.6",                        # The initial release version
     # Full name of the author
     author="Efstratios Pahis from LTEP Technologies",
     description="This is yet another FileWatcher. Developed to run smoothier and without sideffects in comparison to common Packages for such purpose",
@@ -24,7 +24,7 @@ setuptools.setup(
     py_modules=["easyfilewatcher"],             # Name of the python package
     # Directory of the source code of the package
     url="https://github.com/efstratios97/EasyFileWatcher",
-    install_requires=["APScheduler",
+    install_requires=["apscheduler",
                       "SQLAlchemy",
                       "SQLAlchemy-Utils"]                     # Install other dependencies if any
 )
