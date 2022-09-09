@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EasyFileWatcher",                     # This is the name of the package
-    version="0.0.6",                        # The initial release version
+    version="0.0.7",                        # The initial release version
     # Full name of the author
     author="Efstratios Pahis from LTEP Technologies",
     description="This is yet another FileWatcher. Developed to run smoothier and without sideffects in comparison to common Packages for such purpose",

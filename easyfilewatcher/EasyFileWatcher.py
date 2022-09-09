@@ -10,13 +10,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ProcessPoolExecutor
 
-from utils.config import DEFAULT_ENGINE
+from easyfilewatcher.utils.config import DEFAULT_ENGINE
 
-from adapters.ORM import init_tables
+from easyfilewatcher.adapters.ORM import init_tables
 
-from domain.EasyFileWatcherUnit import EasyFileWatcherUnit
+from easyfilewatcher.domain.EasyFileWatcherUnit import EasyFileWatcherUnit
 
-from UoW import EasyFileWatcherUoW
+from easyfilewatcher.UoW import EasyFileWatcherUoW
 
 
 class EasyFileWatcher:
