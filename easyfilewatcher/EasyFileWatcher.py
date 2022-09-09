@@ -167,7 +167,7 @@ class EasyFileWatcher:
         file_watcher_units = EasyFileWatcher.__get_all_easy_file_watcher_units(
             args[1], args[0])
         confirmed_change = EasyFileWatcher.__detect_change(
-            old_file_watcher_units=file_watcher_units_in_db, new_file_watcher_units=file_watcher_units)
+            old_file_watcher_units=file_watcher_units_in_db, new_file_watcher_units=file_watcher_units, event_on_deletion=args[4])
         if confirmed_change:
             args[2](**args[3])
             with EasyFileWatcherUoW() as uow:
