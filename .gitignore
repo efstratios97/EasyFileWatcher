@@ -1,0 +1,9 @@
+*.sqlite
+__pycache__
+*rst
+make.bat
+Makefile
+EasyFileWatcher.egg-info
+docs
+dist
+build
