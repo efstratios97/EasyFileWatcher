@@ -180,8 +180,9 @@ class EasyFileWatcher:
     @staticmethod
     def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit], event_on_deletion: bool) -> bool:
         """This method detects changes in the directory of interest to watch."""
-        length_eval = len(new_file_watcher_units) != len(old_file_watcher_units) if event_on_deletion else len(
-            new_file_watcher_units) > len(old_file_watcher_units)
-        if length_eval or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
+        if event_on_deletion:
+            if len(old_file_watcher_units) > len(new_file_watcher_units):
+                return True
+        if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
             return True
         return False
