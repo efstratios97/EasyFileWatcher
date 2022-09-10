@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>easyfilewatcher.EasyFileWatcher &mdash; EasyFileWatcher 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> EasyFileWatcher
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">easyfilewatcher</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EasyFileWatcher</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>easyfilewatcher.EasyFileWatcher</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for easyfilewatcher.EasyFileWatcher</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">FunctionType</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy_utils.functions</span> <span class="kn">import</span> <span class="n">create_database</span><span class="p">,</span> <span class="n">database_exists</span>
+
+<span class="kn">from</span> <span class="nn">apscheduler.schedulers.background</span> <span class="kn">import</span> <span class="n">BackgroundScheduler</span>
+<span class="kn">from</span> <span class="nn">apscheduler.jobstores.sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemyJobStore</span>
+<span class="kn">from</span> <span class="nn">apscheduler.executors.pool</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+
+<span class="kn">from</span> <span class="nn">easyfilewatcher.utils.config</span> <span class="kn">import</span> <span class="n">DEFAULT_ENGINE</span>
+
+<span class="kn">from</span> <span class="nn">easyfilewatcher.adapters.ORM</span> <span class="kn">import</span> <span class="n">init_tables</span>
+
+<span class="kn">from</span> <span class="nn">easyfilewatcher.domain.EasyFileWatcherUnit</span> <span class="kn">import</span> <span class="n">EasyFileWatcherUnit</span>
+
+<span class="kn">from</span> <span class="nn">easyfilewatcher.UoW</span> <span class="kn">import</span> <span class="n">EasyFileWatcherUoW</span>
+
+
+<div class="viewcode-block" id="EasyFileWatcher"><a class="viewcode-back" href="../../easyfilewatcher.html#easyfilewatcher.EasyFileWatcher.EasyFileWatcher">[docs]</a><span class="k">class</span> <span class="nc">EasyFileWatcher</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__int_workflow_scheduler</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__init_database</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__init_database_tables</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__int_workflow_scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method initializes and configures the Scheduler for the EasyFileWatcher.</span>
+<span class="sd">            :returns: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">workflow_scheduler</span>
+        <span class="n">jobstores</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="n">SQLAlchemyJobStore</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;sqlite:///jobs.sqlite&#39;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">executors</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;threadpool&#39;</span><span class="p">,</span> <span class="s1">&#39;max_workers&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
+            <span class="s1">&#39;processpool&#39;</span><span class="p">:</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">job_defaults</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;coalesce&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;max_instances&#39;</span><span class="p">:</span> <span class="mi">10000</span>
+        <span class="p">}</span>
+        <span class="n">workflow_scheduler</span> <span class="o">=</span> <span class="n">BackgroundScheduler</span><span class="p">()</span>
+        <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">jobstores</span><span class="o">=</span><span class="n">jobstores</span><span class="p">,</span>
+                                     <span class="n">executors</span><span class="o">=</span><span class="n">executors</span><span class="p">,</span> <span class="n">job_defaults</span><span class="o">=</span><span class="n">job_defaults</span><span class="p">)</span>
+        <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init_database</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method initializes the database for the EasyFileWatcher if it doesn&#39;t exist yet.</span>
+<span class="sd">            :returns: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">database_exists</span><span class="p">(</span><span class="n">DEFAULT_ENGINE</span><span class="o">.</span><span class="n">url</span><span class="p">):</span>
+                <span class="n">create_database</span><span class="p">(</span><span class="n">DEFAULT_ENGINE</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;database exists&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init_database_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method initializes the database tables for the EasyFileWatcher if they don&#39;t exist yet.</span>
+<span class="sd">            :returns: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">init_tables</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;database tables already exist&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EasyFileWatcher.delete_easy_file_watcher"><a class="viewcode-back" href="../../easyfilewatcher.html#easyfilewatcher.EasyFileWatcher.EasyFileWatcher.delete_easy_file_watcher">[docs]</a>    <span class="k">def</span> <span class="nf">delete_easy_file_watcher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_watcher_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method deletes an EasyFileWatcher. It returns True at success and False at failure.</span>
+<span class="sd">            :returns: None</span>
+<span class="sd">            :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">remove_job</span><span class="p">(</span>
+                <span class="n">job_id</span><span class="o">=</span><span class="n">directory_watcher_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">print_jobs</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">EasyFileWatcherUoW</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+                <span class="n">file_watcher_units_in_db</span> <span class="o">=</span> <span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">get_all_by_id</span><span class="p">(</span>
+                    <span class="n">directory_watcher_id</span><span class="o">=</span><span class="n">directory_watcher_id</span><span class="p">)</span>
+                <span class="p">[</span><span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                    <span class="n">easy_file_watcher</span><span class="p">)</span> <span class="k">for</span> <span class="n">easy_file_watcher</span> <span class="ow">in</span> <span class="n">file_watcher_units_in_db</span><span class="p">]</span>
+                <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">print_jobs</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="EasyFileWatcher.get_directory_watcher_jobs"><a class="viewcode-back" href="../../easyfilewatcher.html#easyfilewatcher.EasyFileWatcher.EasyFileWatcher.get_directory_watcher_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_directory_watcher_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method return a list of current EasyFileWatcher Jobs. </span>
+<span class="sd">        Good way to retrieve DirectoryWatcherID if not initially provided.</span>
+<span class="sd">            :returns: list of EasyFileWatcher Jobs</span>
+<span class="sd">            :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__get_all_easy_file_watcher_units</span><span class="p">(</span><span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">directory_watcher_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">EasyFileWatcherUnit</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;This method returns all content and its metadata from a specified directory path. Temporary contents/files are disregarded.</span>
+<span class="sd">            :param str directory_path: path of directory to watch</span>
+<span class="sd">            :param str directory_watcher_id: assigned ID of watcher</span>
+<span class="sd">            :returns: List of EasyFileWatcherUnits</span>
+<span class="sd">            :rtype: List[EasyFileWatcherUnit]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory_path</span><span class="p">):</span>
+            <span class="p">[</span><span class="n">file_contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EasyFileWatcherUnit</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+                <span class="s2">&quot;directory_watcher_id&quot;</span><span class="p">:</span> <span class="n">directory_watcher_id</span><span class="p">,</span>
+                <span class="s2">&quot;filepath&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">)),</span>
+                <span class="s2">&quot;last_modification&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">file</span><span class="p">))}))</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filenames</span> <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;~$&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">file_contents</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__get_all_current_filewatcher_units_by_directory_watcher_id</span><span class="p">(</span><span class="n">directory_watcher_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">EasyFileWatcherUnit</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;This method returns all content and its metadata from database associated to a certain EasyFileWatcher.</span>
+<span class="sd">            :param str directory_watcher_id: assigned ID of watcher</span>
+<span class="sd">            :returns: List of EasyFileWatcherUnits</span>
+<span class="sd">            :rtype: List[EasyFileWatcherUnit]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">EasyFileWatcherUoW</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+            <span class="n">current_file_watcher_units</span> <span class="o">=</span> <span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">get_all_by_id</span><span class="p">(</span>
+                <span class="n">directory_watcher_id</span><span class="o">=</span><span class="n">directory_watcher_id</span><span class="p">)</span>
+            <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">current_file_watcher_units</span>
+
+<div class="viewcode-block" id="EasyFileWatcher.add_directory_to_watch"><a class="viewcode-back" href="../../easyfilewatcher.html#easyfilewatcher.EasyFileWatcher.EasyFileWatcher.add_directory_to_watch">[docs]</a>    <span class="k">def</span> <span class="nf">add_directory_to_watch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">FunctionType</span><span class="p">,</span>
+                               <span class="n">start_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="n">end_date</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">callback_param</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">directory_watcher_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                               <span class="n">event_on_deletion</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">polling_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method registers the directory of interest to watch. </span>
+<span class="sd">        It further requires the function signature. </span>
+<span class="sd">        Parameters to the function can be passed as a dictionary. </span>
+<span class="sd">        Passing a directory_watcher_id is highly recommended as it can be used to delete a certain FileWatcher. </span>
+<span class="sd">            :param str directory_path: path of directory to watch</span>
+<span class="sd">            :param func callback: custom user to function to be executed at change in directory</span>
+<span class="sd">            :param Optional[dict] callback_param: parameters to be passed to callback function</span>
+<span class="sd">            :param Optional[str] directory_watcher_id: assigned ID of watcher</span>
+<span class="sd">            :param Optional[bool] event_on_deletion: shall an event be triggered at deletion of File</span>
+<span class="sd">            :param Optional[datetime] start_date: When shall File Watcher starts tracking</span>
+<span class="sd">            :param Optional[datetime] end_date: When shall File Watcher end tracking</span>
+<span class="sd">            :param Optional[int] polling_time: Interval Watcher checks on specified directory</span>
+<span class="sd">            :returns: List of EasyFileWatcherUnits</span>
+<span class="sd">            :rtype: List[EasyFileWatcherUnit]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">directory_watcher_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">directory_watcher_id</span> <span class="o">=</span> <span class="s2">&quot;directory_watcher_&quot;</span> <span class="o">+</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="n">easy_file_watcher_units</span> <span class="o">=</span> <span class="n">EasyFileWatcher</span><span class="o">.</span><span class="n">__get_all_easy_file_watcher_units</span><span class="p">(</span>
+            <span class="n">directory_path</span><span class="o">=</span><span class="n">directory_path</span><span class="p">,</span> <span class="n">directory_watcher_id</span><span class="o">=</span><span class="n">directory_watcher_id</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">EasyFileWatcherUoW</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+            <span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span>
+                <span class="n">easy_file_watcher_units</span><span class="o">=</span><span class="n">easy_file_watcher_units</span><span class="p">)</span>
+            <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">workflow_scheduler</span><span class="o">.</span><span class="n">add_job</span><span class="p">(</span><span class="n">EasyFileWatcher</span><span class="o">.</span><span class="n">execute_job</span><span class="p">,</span> <span class="s1">&#39;interval&#39;</span><span class="p">,</span>  <span class="p">[</span><span class="n">directory_watcher_id</span><span class="p">,</span> <span class="n">directory_path</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">callback_param</span><span class="p">,</span> <span class="n">event_on_deletion</span><span class="p">],</span>
+                                   <span class="n">seconds</span><span class="o">=</span><span class="n">polling_time</span><span class="p">,</span> <span class="n">replace_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">directory_watcher_id</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EasyFileWatcher.execute_job"><a class="viewcode-back" href="../../easyfilewatcher.html#easyfilewatcher.EasyFileWatcher.EasyFileWatcher.execute_job">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">execute_job</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method executes the call back of the directory of interest to watch.&quot;&quot;&quot;</span>
+        <span class="n">file_watcher_units_in_db</span> <span class="o">=</span> <span class="n">EasyFileWatcher</span><span class="o">.</span><span class="n">__get_all_current_filewatcher_units_by_directory_watcher_id</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">file_watcher_units</span> <span class="o">=</span> <span class="n">EasyFileWatcher</span><span class="o">.</span><span class="n">__get_all_easy_file_watcher_units</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">confirmed_change</span> <span class="o">=</span> <span class="n">EasyFileWatcher</span><span class="o">.</span><span class="n">__detect_change</span><span class="p">(</span>
+            <span class="n">old_file_watcher_units</span><span class="o">=</span><span class="n">file_watcher_units_in_db</span><span class="p">,</span> <span class="n">new_file_watcher_units</span><span class="o">=</span><span class="n">file_watcher_units</span><span class="p">,</span> <span class="n">event_on_deletion</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">confirmed_change</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">](</span><span class="o">**</span><span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">with</span> <span class="n">EasyFileWatcherUoW</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+                <span class="p">[</span><span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                    <span class="n">easy_file_watcher</span><span class="p">)</span> <span class="k">for</span> <span class="n">easy_file_watcher</span> <span class="ow">in</span> <span class="n">file_watcher_units_in_db</span><span class="p">]</span>
+                <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="n">uow</span><span class="o">.</span><span class="n">easy_file_watcher_repository</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">file_watcher_units</span><span class="p">)</span>
+                <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__detect_change</span><span class="p">(</span><span class="n">old_file_watcher_units</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EasyFileWatcherUnit</span><span class="p">],</span> <span class="n">new_file_watcher_units</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EasyFileWatcherUnit</span><span class="p">],</span> <span class="n">event_on_deletion</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method detects changes in the directory of interest to watch.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">event_on_deletion</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">old_file_watcher_units</span> <span class="o">&gt;</span> <span class="n">new_file_watcher_units</span> <span class="ow">and</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_file_watcher_units</span><span class="p">)</span> <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">old_file_watcher_units</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">new_file_watcher_units</span><span class="p">))):</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_file_watcher_units</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">old_file_watcher_units</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">old_file_watcher_units</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_file_watcher_units</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Efstratios Pahis from LTEP Technologies UG.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
