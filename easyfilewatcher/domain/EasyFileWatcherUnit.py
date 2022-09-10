@@ -34,6 +34,12 @@ class EasyFileWatcherUnit:
         return ((self.size) >= (__o.size))
 
     def __eq__(self, __o: object) -> bool:
-        if not isinstance(__o, EasyFileWatcherUnit):
-            return False
-        return True if hash((self.filepath, self.last_modification, self.size)) == hash((__o.filepath, __o.last_modification, __o.size)) else False
+        try:
+            if not isinstance(__o, EasyFileWatcherUnit):
+                return False
+            return True if hash((self.filepath, self.last_modification, self.size)) == hash((__o.filepath, __o.last_modification, __o.size)) else False
+        except Exception as e:
+            print(e)
+
+    def __hash__(self) -> int:
+        return hash((self.filepath, self.last_modification, self.size))

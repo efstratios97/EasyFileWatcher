@@ -25,9 +25,9 @@
     <br />
     <br />
     <a href="https://github.com/efstratios97/EasyFileWatcher">View Demo</a>
-    ·
+    -
     <a href="https://github.com/efstratios97/EasyFileWatcher/issues">Report Bug</a>
-    ·
+    -
     <a href="https://github.com/efstratios97/EasyFileWatcher/issues">Request Feature</a>
   </p>
 </div>
@@ -84,22 +84,22 @@ This is yet another FileWatcher. We developed it to run smoothier and without si
 
 <!-- GETTING STARTED -->
 ## Getting Started
-
-pip install EasyFileWatcher
-
+```python
 from easyfilewatcher.EasyFileWatcher import EasyFileWatcher
 
 
-def do_stuff(msg: str):
+def print_msg(msg: str):
     print(msg)
 
 
 if __name__ == "__main__":
     filewatcher = EasyFileWatcher()
     filewatcher.add_directory_to_watch(directory_path="your\\directory",
-                                       directory_watcher_id="my_id", callback=do_stuff, callback_param={'msg': 'hi'}, event_on_deletion=False)
+                                       directory_watcher_id="my_id", callback=print_msg, 
+                                       callback_param={'msg': 'hi'}, event_on_deletion=False)
     while(True):
         pass
+```
 
 ### Prerequisites
 
@@ -108,7 +108,8 @@ Python >=3.8
 
 ### Installation
 
-pip install -i https://test.pypi.org/simple/ LTEP-Athena-API
+
+pip install EasyFileWatcher
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -117,9 +118,7 @@ pip install -i https://test.pypi.org/simple/ LTEP-Athena-API
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-The Beta Documentation is available on https://ltep-athena-api.readthedocs.io/en/latest/
-
-_For more examples, please refer to the [Documentation](https://ltep-athena-api.readthedocs.io/en/latest/)_
+The Documentation will be soon available in readthedocs.io
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -130,7 +129,7 @@ ROADMAP
 
 - [x] Add Changelog
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/efstratios97/EasyFileWatcher/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

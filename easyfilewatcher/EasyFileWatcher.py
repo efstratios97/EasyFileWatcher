@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import uuid
 
@@ -134,8 +135,9 @@ class EasyFileWatcher:
         return current_file_watcher_units
 
     def add_directory_to_watch(self, directory_path: str, callback: FunctionType,
+                               start_date: Optional[datetime] = datetime.now(), end_date: Optional[datetime] = None,
                                callback_param: Optional[dict] = None, directory_watcher_id: Optional[str] = None,
-                               event_on_deletion: Optional[bool] = True) -> None:
+                               event_on_deletion: Optional[bool] = True, polling_time: Optional[int] = 2) -> None:
         """This method registers the directory of interest to watch. 
         It further requires the function signature. 
         Parameters to the function can be passed as a dictionary. 
@@ -145,6 +147,9 @@ class EasyFileWatcher:
             :param Optional[dict] callback_param: parameters to be passed to callback function
             :param Optional[str] directory_watcher_id: assigned ID of watcher
             :param Optional[bool] event_on_deletion: shall an event be triggered at deletion of File
+            :param Optional[datetime] start_date: When shall File Watcher starts tracking
+            :param Optional[datetime] end_date: When shall File Watcher end tracking
+            :param Optional[int] polling_time: Interval Watcher checks on specified directory
             :returns: List of EasyFileWatcherUnits
             :rtype: List[EasyFileWatcherUnit]
         """
@@ -156,8 +161,8 @@ class EasyFileWatcher:
             uow.easy_file_watcher_repository.add_all(
                 easy_file_watcher_units=easy_file_watcher_units)
             uow.commit()
-        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param, event_on_deletion], seconds=2,
-                                   replace_existing=True, id=directory_watcher_id)
+        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param, event_on_deletion],
+                                   seconds=polling_time, replace_existing=True, id=directory_watcher_id, start_date=start_date, end_date=end_date)
 
     @staticmethod
     def execute_job(*args):
@@ -180,9 +185,12 @@ class EasyFileWatcher:
     @staticmethod
     def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit], event_on_deletion: bool) -> bool:
         """This method detects changes in the directory of interest to watch."""
-        if not event_on_deletion:
-            if len(old_file_watcher_units) > len(new_file_watcher_units):
-                return False
-        if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
-            return True
-        return False
+        try:
+            if not event_on_deletion:
+                if old_file_watcher_units > new_file_watcher_units and sorted(new_file_watcher_units) == sorted(list(set(old_file_watcher_units).intersection(new_file_watcher_units))):
+                    return False
+            if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
+                return True
+            return False
+        except Exception as e:
+            print(e)
