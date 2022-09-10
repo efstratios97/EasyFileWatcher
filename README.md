@@ -85,9 +85,21 @@ This is yet another FileWatcher. We developed it to run smoothier and without si
 <!-- GETTING STARTED -->
 ## Getting Started
 
-How to install beta-Version: pip install -i https://test.pypi.org/simple/ LTEP-Athena-API
+pip install EasyFileWatcher
 
-Production Version follows soon...
+from easyfilewatcher.EasyFileWatcher import EasyFileWatcher
+
+
+def do_stuff(msg: str):
+    print(msg)
+
+
+if __name__ == "__main__":
+    filewatcher = EasyFileWatcher()
+    filewatcher.add_directory_to_watch(directory_path="your\\directory",
+                                       directory_watcher_id="my_id", callback=do_stuff, callback_param={'msg': 'hi'}, event_on_deletion=False)
+    while(True):
+        pass
 
 ### Prerequisites
 
