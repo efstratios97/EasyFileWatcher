@@ -135,7 +135,7 @@ class EasyFileWatcher:
 
     def add_directory_to_watch(self, directory_path: str, callback: FunctionType,
                                callback_param: Optional[dict] = None, directory_watcher_id: Optional[str] = None,
-                               event_on_deletion: Optional[bool] = False) -> None:
+                               event_on_deletion: Optional[bool] = True) -> None:
         """This method registers the directory of interest to watch. 
         It further requires the function signature. 
         Parameters to the function can be passed as a dictionary. 
@@ -180,9 +180,9 @@ class EasyFileWatcher:
     @staticmethod
     def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit], event_on_deletion: bool) -> bool:
         """This method detects changes in the directory of interest to watch."""
-        if event_on_deletion:
+        if not event_on_deletion:
             if len(old_file_watcher_units) > len(new_file_watcher_units):
-                return True
+                return False
         if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
             return True
         return False
