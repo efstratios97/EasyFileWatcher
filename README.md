@@ -118,7 +118,7 @@ pip install EasyFileWatcher
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-The Documentation will be soon available in readthedocs.io
+The Documentation you can find here [docs](https://easyfilewatcher.readthedocs.io/en/latest/index.html)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
