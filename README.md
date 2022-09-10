@@ -165,7 +165,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Efstratios Pahis - [@ltepTechnologoes](https://ltep-technologies.com) - 
+Efstratios Pahis - [@ltepTechnologies](https://ltep-technologies.com) - 
 
 Project Link: [https://github.com/efstratios97/EasyFileWatcher](https://github.com/efstratios97/EasyFileWatcher)
 
