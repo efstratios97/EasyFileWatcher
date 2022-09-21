@@ -22,19 +22,24 @@ from easyfilewatcher.UoW import EasyFileWatcherUoW
 
 class EasyFileWatcher:
 
-    def __init__(self) -> None:
-        self.__int_workflow_scheduler()
+    def __init__(self, jobstore: Optional[str] = None) -> None:
+        """This method initializes the EasyFileWatcher.
+            :param Optional[str] jobstore: url to database storing jobs; default local sqlite file
+            :returns: None
+            :rtype: None
+        """
+        self.__int_filewatcher_sheduler(jobstore=jobstore)
         self.__init_database()
         self.__init_database_tables()
 
-    def __int_workflow_scheduler(self) -> None:
+    def __int_filewatcher_sheduler(self, jobstore: str = None) -> None:
         """This method initializes and configures the Scheduler for the EasyFileWatcher.
             :returns: None
             :rtype: None
         """
-        global workflow_scheduler
+        global filewatcher_sheduler
         jobstores = {
-            'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+            'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite' if jobstore is None else jobstore)
         }
         executors = {
             'default': {'type': 'threadpool', 'max_workers': 20},
@@ -44,10 +49,10 @@ class EasyFileWatcher:
             'coalesce': False,
             'max_instances': 10000
         }
-        workflow_scheduler = BackgroundScheduler()
-        workflow_scheduler.configure(jobstores=jobstores,
-                                     executors=executors, job_defaults=job_defaults)
-        workflow_scheduler.start()
+        filewatcher_sheduler = BackgroundScheduler()
+        filewatcher_sheduler.configure(jobstores=jobstores,
+                                       executors=executors, job_defaults=job_defaults)
+        filewatcher_sheduler.start()
 
     def __init_database(self) -> None:
         """This method initializes the database for the EasyFileWatcher if it doesn't exist yet.
@@ -78,10 +83,10 @@ class EasyFileWatcher:
             :rtype: None
         """
         try:
-            workflow_scheduler.remove_job(
+            filewatcher_sheduler.remove_job(
                 job_id=directory_watcher_id)
         except Exception as e:
-            workflow_scheduler.print_jobs()
+            filewatcher_sheduler.print_jobs()
             print(e)
         try:
             with EasyFileWatcherUoW() as uow:
@@ -91,18 +96,18 @@ class EasyFileWatcher:
                     easy_file_watcher) for easy_file_watcher in file_watcher_units_in_db]
                 uow.commit()
         except Exception as e:
-            workflow_scheduler.print_jobs()
+            filewatcher_sheduler.print_jobs()
             print(e)
             return False
         return True
 
     def get_directory_watcher_jobs(self) -> list:
         """This method return a list of current EasyFileWatcher Jobs. 
-        Good way to retrieve DirectoryWatcherID if not initially provided.
+            Good way to retrieve DirectoryWatcherID if not initially provided.
             :returns: list of EasyFileWatcher Jobs
             :rtype: list
         """
-        return workflow_scheduler.get_jobs()
+        return filewatcher_sheduler.get_jobs()
 
     @staticmethod
     def __get_all_easy_file_watcher_units(directory_path: str, directory_watcher_id: str) -> List[EasyFileWatcherUnit]:
@@ -161,8 +166,8 @@ class EasyFileWatcher:
             uow.easy_file_watcher_repository.add_all(
                 easy_file_watcher_units=easy_file_watcher_units)
             uow.commit()
-        workflow_scheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param, event_on_deletion],
-                                   seconds=polling_time, replace_existing=True, id=directory_watcher_id, start_date=start_date, end_date=end_date)
+        filewatcher_sheduler.add_job(EasyFileWatcher.execute_job, 'interval',  [directory_watcher_id, directory_path, callback, callback_param, event_on_deletion],
+                                     seconds=polling_time, replace_existing=True, id=directory_watcher_id, start_date=start_date, end_date=end_date)
 
     @staticmethod
     def execute_job(*args):
@@ -174,13 +179,13 @@ class EasyFileWatcher:
         confirmed_change = EasyFileWatcher.__detect_change(
             old_file_watcher_units=file_watcher_units_in_db, new_file_watcher_units=file_watcher_units, event_on_deletion=args[4])
         if confirmed_change:
-            args[2](**args[3])
             with EasyFileWatcherUoW() as uow:
                 [uow.easy_file_watcher_repository.delete(
                     easy_file_watcher) for easy_file_watcher in file_watcher_units_in_db]
                 uow.commit()
                 uow.easy_file_watcher_repository.add_all(file_watcher_units)
                 uow.commit()
+            args[2](**args[3])
 
     @staticmethod
     def __detect_change(old_file_watcher_units: List[EasyFileWatcherUnit], new_file_watcher_units: List[EasyFileWatcherUnit], event_on_deletion: bool) -> bool:
@@ -192,5 +197,27 @@ class EasyFileWatcher:
             if len(new_file_watcher_units) != len(old_file_watcher_units) or sorted(old_file_watcher_units) != sorted(new_file_watcher_units):
                 return True
             return False
+        except Exception as e:
+            print(e)
+
+    def resume_file_watching(directory_watcher_id: str) -> None:
+        """This method resumes a FileWatcher if it was paused before.
+            :param str directory_watcher_id: assigned ID of watcher
+            :returns: None
+            :rtype: None
+        """
+        try:
+            filewatcher_sheduler.resume_job(job_id=directory_watcher_id)
+        except Exception as e:
+            print(e)
+
+    def pause_file_watching(directory_watcher_id: str) -> None:
+        """This method pauses a FileWatcher.
+            :param str directory_watcher_id: assigned ID of watcher
+            :returns: None
+            :rtype: None
+        """
+        try:
+            filewatcher_sheduler.pause_job(job_id=directory_watcher_id)
         except Exception as e:
             print(e)
