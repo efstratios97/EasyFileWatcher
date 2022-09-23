@@ -90,7 +90,7 @@ This is yet another FileWatcher. Developed to run smoothier, without sideffects 
 <td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
 </tr>
 <tr>
-<td><strong>Configurable Pooling Time</strong></td>
+<td><strong>Configurable Polling Time</strong></td>
 <td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
 <td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
 </tr>
