@@ -200,24 +200,28 @@ class EasyFileWatcher:
         except Exception as e:
             print(e)
 
-    def resume_file_watching(directory_watcher_id: str) -> None:
+    def resume_file_watching(self, directory_watcher_id: str) -> bool:
         """This method resumes a FileWatcher if it was paused before.
             :param str directory_watcher_id: assigned ID of watcher
-            :returns: None
-            :rtype: None
+            :returns: success
+            :rtype: bool
         """
         try:
             filewatcher_sheduler.resume_job(job_id=directory_watcher_id)
+            return True
         except Exception as e:
             print(e)
+            return False
 
-    def pause_file_watching(self, directory_watcher_id: str) -> None:
+    def pause_file_watching(self, directory_watcher_id: str) -> bool:
         """This method pauses a FileWatcher.
             :param str directory_watcher_id: assigned ID of watcher
-            :returns: None
-            :rtype: None
+            :returns: success
+            :rtype: bool
         """
         try:
-            filewatcher_sheduler.pause_job(self, job_id=directory_watcher_id)
+            filewatcher_sheduler.pause_job(job_id=directory_watcher_id)
+            return True
         except Exception as e:
             print(e)
+            return False
