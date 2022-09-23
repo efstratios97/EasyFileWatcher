@@ -211,13 +211,13 @@ class EasyFileWatcher:
         except Exception as e:
             print(e)
 
-    def pause_file_watching(directory_watcher_id: str) -> None:
+    def pause_file_watching(self, directory_watcher_id: str) -> None:
         """This method pauses a FileWatcher.
             :param str directory_watcher_id: assigned ID of watcher
             :returns: None
             :rtype: None
         """
         try:
-            filewatcher_sheduler.pause_job(job_id=directory_watcher_id)
+            filewatcher_sheduler.pause_job(self, job_id=directory_watcher_id)
         except Exception as e:
             print(e)
