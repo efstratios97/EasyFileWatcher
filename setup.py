@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EasyFileWatcher",                     # This is the name of the package
-    version="0.0.2",                        # The initial release version
+    version="0.0.4",                        # The initial release version
     # Full name of the author
-    author="Efstratios Pahis from LTEP Technologies",
-    description="This is yet another FileWatcher. Developed to run smoothier and without sideffects in comparison to common Packages for such purpose",
+    author="Efstratios Pahis",
+    description="This is yet another FileWatcher. Developed to run smoothier, without sideffects and give more control to the developer in comparison to common packages for such purpose",
     # Long description read from the the readme file
     long_description=long_description,
     long_description_content_type="text/markdown",

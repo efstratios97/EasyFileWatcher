@@ -67,7 +67,38 @@
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://www.ltep-technologies.com/wp-content/uploads/2022/06/ATHINA_LOGO-3.png) -->
 
-This is yet another FileWatcher. We developed it to run smoothier and without sideffects in comparison to common Packages like WatchDog.
+This is yet another FileWatcher. Developed to run smoothier, without sideffects and give more control to the developer in comparison to common packages for such purpose.
+<table>
+<tr>
+<th>Features</th>
+<th>EasyFileWatcher</th>
+<th>Others (Watchdog etc.)</th>
+</th>
+<tr>
+<td><strong>Schedule Start & End Time</strong></td>
+<td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
+<td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
+</tr>
+<tr>
+<td><strong>Pause & Resume</strong></td>
+<td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
+<td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
+</tr>
+<tr>
+<td><strong>By default runs in Background</strong></td>
+<td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
+<td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
+</tr>
+<tr>
+<td><strong>Configurable Pooling Time</strong></td>
+<td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
+<td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
+</tr>
+<td><strong>Persist FileWatcher Tasks</strong></td>
+<td><img src="https://img.icons8.com/emoji/48/000000/check-mark-emoji.png"/></td>
+<td><img src="https://img.icons8.com/external-bearicons-flat-bearicons/46/000000/external-block-essential-collection-bearicons-flat-bearicons.png"/></td>
+</tr>
+</table>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
